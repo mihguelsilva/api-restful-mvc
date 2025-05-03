@@ -1,0 +1,4 @@
+# Ignorar .env
+.env
+/vendor/
+composer.lock
