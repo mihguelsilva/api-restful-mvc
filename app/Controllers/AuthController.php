@@ -11,7 +11,10 @@ class AuthController
 {
     public static function login(Request $request): void
     {
-        $data = $request->body();
+        $data = $request->body([
+            'email' => 'email',
+            'password' => 'string'
+        ]);
 
         if ((!isset($data['email'])) || (!isset($data['password']))) {
             Response::json(['error' => 'Dados incompletos'], 403);
@@ -24,6 +27,7 @@ class AuthController
             $payload = [
                 'suid' => $user['ID'],
                 'email' => $user['email'],
+                'perfil' => $user['perfil'],
                 'iat' => time(),
                 'exp' => time() + 3600
             ];

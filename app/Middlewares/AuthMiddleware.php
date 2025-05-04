@@ -8,7 +8,7 @@ use Firebase\JWT\Key;
 
 class AuthMiddleware
 {
-    public static function handle(Request $request): void
+    public static function handle(Request $request, array $roles): bool
     {
         $headers = getallheaders();
         $authorization = $headers['Authorization'] ?? $headers['authorization'] ?? null;
@@ -21,9 +21,23 @@ class AuthMiddleware
 
         try {
             $decoded = JWT::decode($token, new Key(_ENV['JWT_SECRET'], 'HS256'));
+
+            if (!isset($decoded->perfil)) {
+                Response::json(['error' => 'Perfil não encontrado no token'], 403);
+                return false;
+            }
+
+            if (!in_array($decoded->perfil, $roles)) {
+                Response::json(['error' => 'Acesso não autorizado para este perfil'], 403);
+                return false;
+            }
+
+            // Autorizado
+            return true;
         } catch (\Exception $e) {
             error_log($e->getCode() . ' ' . $e->getMessage());
             Response::json(['error' => 'Token inválido ou expirado'], 401);
+            return false;
         }
 
     }
